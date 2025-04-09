@@ -17,15 +17,35 @@ public class TextProcessor : ITextProcessor
 
     public void ProcessFiles(string[] files)
     {
-        Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = maxThreads }, file =>
+        var partitions = PartitionFiles(files, maxThreads);
+        var tasks = partitions.Select(partition => Task.Run(() =>
         {
-            var content = File.ReadAllText(file);
-            var words = Regex.Split(content, "\\W+");
-            foreach (var word in words.Where(w => !string.IsNullOrWhiteSpace(w)))
+            foreach (var file in partition)
             {
-                index.Add(word, Path.GetFileName(file));
+                var content = File.ReadAllText(file);
+                var words = Regex.Split(content, "\\W+");
+                foreach (var word in words.Where(w => !string.IsNullOrWhiteSpace(w)))
+                {
+                    index.Add(word, Path.GetFileName(file));
+                }
             }
-        });
+        })).ToArray();
+
+        Task.WaitAll(tasks);
+    }
+
+    private List<List<string>> PartitionFiles(string[] files, int partitions)
+    {
+        var result = new List<List<string>>();
+        for (int i = 0; i < partitions; i++)
+            result.Add(new List<string>());
+
+        for (int i = 0; i < files.Length; i++)
+        {
+            result[i % partitions].Add(files[i]);
+        }
+
+        return result;
     }
 }
 
