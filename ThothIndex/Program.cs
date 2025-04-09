@@ -18,12 +18,13 @@ using var host = Host.CreateDefaultBuilder(args)
                 })
                 .Build();
 
+var configuration = host.Services.GetRequiredService<IConfiguration>();
 var index = host.Services.GetRequiredService<InvertedIndex>();
 var processor = host.Services.GetRequiredService<ITextProcessor>();
 var persistence = host.Services.GetRequiredService<IIndexPersistence>();
 
-string directoryPath = @"D:\ThothIndex\textos";
-string outputIndexPath = @"D:\ThothIndex\indice_invertido.json";
+string directoryPath = configuration["directoryPath"] ?? @"D:\ThothIndex\textos";
+string outputIndexPath = configuration["outputIndexPath"] ?? @"D:\ThothIndex\indice_invertido.json";
 
 if (!Directory.Exists(directoryPath))
     Directory.CreateDirectory(directoryPath);
