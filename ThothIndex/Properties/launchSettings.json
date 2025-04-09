@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ThothIndex": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
